@@ -1,55 +1,70 @@
-const Header = ({course}) => {
+import { useState } from 'react'
+
+const StatisticLine = ({text, value, unit}) => {
     return (
-        <h1>{course}</h1>
+        <tbody>
+            <tr>
+                <td>{text}</td>
+                <td>{value} {unit}</td>
+            </tr>
+        </tbody>
     )
 }
 
-const Part = ({part}) => {
-    return (
-        <p>
-            {part.name} {part.exercises}
-        </p>
-    )
-}
-
-const Content = ({parts}) => {
+const Statistics = ({ good, neutral, bad }) => {
+    if (good <= 0 && neutral <= 0 && bad <= 0) {
+        return (
+            <>
+                <h1>statistics</h1>
+                <p>No feedback given</p>
+            </>
+        )
+    }
     return (
         <>
-        <Part part={parts[0]} />
-        <Part part={parts[1]} />
-        <Part part={parts[2]} />
+            <h1>statistics</h1>
+            <table>
+                <StatisticLine text="good" value={good} />
+                <StatisticLine text="neutral" value={neutral} />
+                <StatisticLine text="bad" value={bad} />
+                <StatisticLine text="all" value={good + neutral + bad} />
+                <StatisticLine text="average" value={(good - bad) / (good + neutral + bad)} />
+                <StatisticLine text="positive" value={100 * good / (good + neutral + bad)} unit={'%'} />
+            </table>
         </>
     )
 }
 
-const Total = ({exercises}) => {
-    return (
-        <p>Number of exercises {exercises.reduce((sum, x) => sum + x, 0)}</p>
-    )
-}
-
 const App = () => {
-    const course = 'Half Stack application development'
-    const part1 = 'Fundamentals of React'
-    const exercises1 = 10
-    const part2 = 'Using props to pass data'
-    const exercises2 = 7
-    const part3 = 'State of a component'
-    const exercises3 = 14
+    // save clicks of each button to its own state
+    const [good, setGood] = useState(0)
+    const [neutral, setNeutral] = useState(0)
+    const [bad, setBad] = useState(0)
 
-    const exercises = [exercises1, exercises2, exercises3]
+    const FeedbackButton = ({ onClick, type, text }) => (
+        <button onClick={() => onClick(type)}>
+            {text}
+        </button>
+    );
 
-    const parts = [
-        { name: part1, exercises: exercises1 },
-        { name: part2, exercises: exercises2 },
-        { name: part3, exercises: exercises3 },
-    ]
+    const handleFeedback = (type) => {
+        switch (type) {
+            case 'good':    setGood(    good    + 1 ); break;
+            case 'neutral': setNeutral( neutral + 1 ); break;
+            case 'bad':     setBad(     bad     + 1 ); break;
+            default: break;
+        }
+    }
 
     return (
         <div>
-            <Header course={course} />
-            <Content parts={parts} />
-            <Total exercises={exercises} />
+            <h1>give feedback</h1>
+            <FeedbackButton onClick={handleFeedback} type={'good'}    text={'Good'}/>
+            <FeedbackButton onClick={handleFeedback} type={'neutral'} text={'Neutral'}/>
+            <FeedbackButton onClick={handleFeedback} type={'bad'}     text={'Bad'}/>
+            <Statistics good={good} neutral={neutral} bad={bad} />
+
+
         </div>
     )
 }
